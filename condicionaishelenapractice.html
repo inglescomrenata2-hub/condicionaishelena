@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditionals in Clinical Practice — Helena</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --coral-mid: #F0997B;
+    --coral-dark: #993C1D;
+    --accent-bg: #FCE9E7;
+    --green-light: #EAF3DE;
+    --green-mid: #97C459;
+    --green-dark: #3B6D11;
+    --amber-light: #FAEEDA;
+    --amber-mid: #EF9F27;
+    --amber-dark: #854F0B;
+    --red: #D64545;
+    --blue-light: #E8F0F9;
+    --blue-mid: #6B9BD1;
+    --blue-dark: #2B4E78;
+    --teal-light: #E3F3EF;
+    --teal-mid: #5DB8A5;
+    --teal-dark: #1F6B5C;
+    --gray-bg: #F7F5F2;
+    --gray-card: #FFFFFF;
+    --gray-border: #E5E2DC;
+    --gray-muted: #9A9690;
+    --gray-text: #2C2A27;
+    --gray-sub: #5F5D59;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-bg);
+    color: var(--gray-text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .page-header {
+    background: var(--coral);
+    padding: 32px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+  .page-header::after {
+    content: '';
+    position: absolute; bottom: -20px; left: 80px;
+    width: 110px; height: 110px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .header-inner { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .header-tag { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 7px; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #fff; line-height: 1.2; margin-bottom: 5px; }
+  .header-sub { font-size: 14px; color: rgba(255,255,255,0.75); }
+  .header-student { margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.9); min-height: 18px; }
+  .header-student strong { font-weight: 500; }
+  .header-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .name-input {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: #fff; width: 150px;
+  }
+  .name-input::placeholder { color: rgba(255,255,255,0.65); }
+  .name-input:focus { outline: none; background: rgba(255,255,255,0.22); }
+  .btn-pdf {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;
+  }
+  .btn-pdf:hover { background: rgba(255,255,255,0.25); }
+
+  /* ---------- Tabs ---------- */
+  .tab-bar {
+    background: var(--gray-card);
+    border-bottom: 1px solid var(--gray-border);
+    padding: 0 40px;
+    display: flex; gap: 4px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .tab-btn {
+    background: none; border: none;
+    border-bottom: 3px solid transparent;
+    padding: 14px 16px 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; color: var(--gray-muted);
+    cursor: pointer; white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--coral-dark); border-bottom-color: var(--coral); }
+  .tab-btn:hover:not(.active) { color: var(--gray-text); }
+
+  .content { padding: 28px 40px; max-width: 780px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---------- Score ---------- */
+  .score-bar {
+    background: var(--gray-card);
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .score-label { font-size: 13px; color: var(--gray-sub); }
+  .score-num { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--coral); min-width: 58px; }
+  .score-track { flex: 1; height: 5px; background: var(--gray-border); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 5px; background: var(--coral); border-radius: 3px; width: 0%; transition: width 0.4s ease; }
+  .btn-reset {
+    background: none; border: 1px solid var(--gray-border); border-radius: var(--radius);
+    padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--gray-muted); cursor: pointer;
+  }
+  .btn-reset:hover { border-color: var(--coral-mid); color: var(--coral-dark); }
+
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .section-note { font-size: 13px; color: var(--gray-sub); margin-bottom: 18px; line-height: 1.6; }
+
+  /* ---------- Explanation ---------- */
+  .explain-card {
+    background: var(--gray-card);
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .explain-card.c-zero { border-left: 4px solid var(--teal-mid); }
+  .explain-card.c-first { border-left: 4px solid var(--blue-mid); }
+  .explain-card.c-second { border-left: 4px solid var(--coral); }
+  .explain-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .c-zero .explain-title { color: var(--teal-dark); }
+  .c-first .explain-title { color: var(--blue-dark); }
+  .c-second .explain-title { color: var(--coral-dark); }
+  .formula {
+    display: inline-block; background: var(--gray-bg); border: 1px solid var(--gray-border);
+    border-radius: 6px; padding: 3px 10px; font-size: 13px; color: var(--gray-sub);
+    font-family: monospace; margin-bottom: 8px;
+  }
+  .explain-card p { font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+  .explain-card ul { margin: 6px 0 0 18px; }
+  .explain-card li { font-size: 14px; line-height: 1.7; color: var(--gray-sub); }
+  .explain-card li strong { color: var(--gray-text); }
+
+  .compare-table {
+    width: 100%; border-collapse: collapse; background: var(--gray-card);
+    border: 1px solid var(--gray-border); border-radius: var(--radius-lg);
+    overflow: hidden; margin-bottom: 16px; font-size: 13px;
+  }
+  .compare-table th {
+    background: var(--gray-bg); color: var(--gray-sub); text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.06em; font-weight: 500;
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-border);
+  }
+  .compare-table td { padding: 11px 12px; border-bottom: 1px solid var(--gray-border); vertical-align: top; line-height: 1.55; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table td.lbl { font-weight: 500; background: var(--gray-bg); width: 90px; }
+  .compare-table td.t0 { color: var(--teal-dark); font-weight: 500; }
+  .compare-table td.t1 { color: var(--blue-dark); font-weight: 500; }
+  .compare-table td.t2 { color: var(--coral-dark); font-weight: 500; }
+
+  .tip-box {
+    background: #FFF8F6; border: 1px dashed var(--coral-mid);
+    border-radius: var(--radius); padding: 15px 20px;
+    font-size: 14px; line-height: 1.7; margin-bottom: 12px;
+  }
+  .tip-box strong { color: var(--coral-dark); }
+
+  /* ---------- Exercise cards ---------- */
+  .ex-card {
+    background: var(--gray-card);
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px 16px;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .ex-card.done-correct { border-color: var(--green-mid); }
+  .ex-card.done-wrong { border-color: var(--amber-mid); }
+  .ex-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ex-num {
+    background: var(--coral-light); color: var(--coral-dark);
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .ex-tag { font-size: 12px; color: var(--gray-muted); }
+  .sentence { font-size: 16px; line-height: 2.2; margin-bottom: 12px; }
+  .sentence .verb-hint { font-size: 13px; color: var(--gray-muted); font-style: italic; }
+  .situation { font-size: 14px; color: var(--gray-sub); margin-bottom: 12px; line-height: 1.6; }
+  .situation strong { color: var(--gray-text); }
+
+  input.blank {
+    display: inline-block;
+    border: none; border-bottom: 2px solid var(--coral-mid);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--gray-text);
+    padding: 1px 6px 2px; outline: none; text-align: center; border-radius: 0;
+    vertical-align: baseline;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input.blank.w-s { width: 11ch; }
+  input.blank.w-m { width: 16ch; }
+  input.blank.w-l { width: 22ch; }
+  input.blank:focus { border-bottom-color: var(--coral); background: var(--coral-light); }
+  input.blank.correct { border-bottom-color: var(--green-mid); background: var(--green-light); color: var(--green-dark); }
+  input.blank.wrong { border-bottom-color: var(--amber-mid); background: var(--amber-light); color: var(--amber-dark); }
+
+  input.rewrite {
+    display: block; width: 100%;
+    border: 1px solid var(--gray-border); border-radius: var(--radius);
+    background: var(--gray-bg);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--gray-text);
+    padding: 10px 12px; outline: none; margin-top: 4px;
+  }
+  input.rewrite:focus { border-color: var(--coral-mid); background: #fff; }
+  input.rewrite.correct { border-color: var(--green-mid); background: var(--green-light); color: var(--green-dark); }
+  input.rewrite.wrong { border-color: var(--amber-mid); background: var(--amber-light); color: var(--amber-dark); }
+
+  .base-sentence {
+    background: var(--gray-bg); border-left: 3px solid var(--coral-mid);
+    padding: 10px 14px; font-size: 14px; color: var(--gray-sub);
+    border-radius: 4px; margin-bottom: 12px; line-height: 1.6;
+  }
+  .base-sentence strong { color: var(--gray-text); }
+
+  .pill-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .opt {
+    text-align: left;
+    background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: var(--radius);
+    padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--gray-text);
+    cursor: pointer; transition: all 0.15s; line-height: 1.5;
+  }
+  .opt:hover { border-color: var(--coral-mid); }
+  .opt.selected-correct { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); font-weight: 500; }
+  .opt.selected-wrong { background: var(--amber-light); border-color: var(--amber-mid); color: var(--amber-dark); }
+  .opt.reveal-correct { border-color: var(--green-mid); color: var(--green-dark); }
+  .opt.locked { pointer-events: none; }
+
+  .btn-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .btn-check {
+    background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
+    padding: 8px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-check:hover { background: var(--coral-dark); }
+  .btn-check:disabled { background: var(--gray-border); color: var(--gray-muted); cursor: default; }
+
+  .feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; line-height: 1.6; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
+  .feedback.partial { background: var(--amber-light); color: var(--amber-dark); border: 1px solid var(--amber-mid); }
+  .feedback.hint { background: #F1EFE8; color: var(--gray-sub); border: 1px solid var(--gray-border); }
+
+  /* ---------- Speaking ---------- */
+  .speak-card {
+    background: var(--gray-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg);
+    padding: 20px 24px 28px; margin-bottom: 18px;
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  }
+  .speak-text { flex: 1; min-width: 240px; }
+  .speak-prompt { font-size: 15px; line-height: 1.65; margin-bottom: 8px; }
+  .speak-focus {
+    font-size: 11px; color: var(--coral-dark); background: var(--coral-light);
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+  }
+  .timer-wrap { position: relative; width: 84px; height: 84px; flex-shrink: 0; margin-bottom: 8px; }
+  .timer-wrap svg { transform: rotate(-90deg); display: block; }
+  .ring-bg { fill: none; stroke: var(--gray-border); stroke-width: 6; }
+  .ring-progress { fill: none; stroke: var(--coral); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-wrap.danger .ring-progress { stroke: var(--red); animation: ringPulse 0.9s infinite; }
+  .timer-wrap.danger .timer-time { color: var(--red); }
+  @keyframes ringPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .timer-time {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: var(--gray-text);
+  }
+  .timer-btn-wrap { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); }
+  .timer-btn {
+    background: var(--coral); color: #fff; border: none; border-radius: 20px;
+    padding: 4px 14px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  }
+  .timer-btn.stop { background: var(--gray-muted); }
+
+  /* ---------- Case study speaking ---------- */
+  .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .case-box {
+    background: var(--gray-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg);
+    padding: 16px 18px; font-size: 13px; line-height: 1.65; color: var(--gray-sub);
+  }
+  .case-box.a { border-top: 3px solid var(--coral); }
+  .case-box.b { border-top: 3px solid var(--blue-mid); }
+  .case-box h4 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--gray-text); }
+  .case-box ul { margin-left: 16px; }
+  .case-box li strong { color: var(--gray-text); font-weight: 500; }
+  .part-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--coral-dark); margin-bottom: 4px; }
+  .part-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+  .chip { background: var(--accent-bg); color: var(--coral-dark); border-radius: 20px; padding: 3px 11px; font-size: 12px; line-height: 1.5; }
+  .btn-model {
+    background: none; color: var(--blue-dark); border: 1px solid var(--blue-mid); border-radius: var(--radius);
+    padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 4px;
+  }
+  .btn-model:hover { background: var(--blue-light); }
+  .model-sample {
+    display: none; margin-top: 10px; background: var(--blue-light); border: 1px solid var(--blue-mid);
+    border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--blue-dark); line-height: 1.65;
+  }
+  .model-sample.show { display: block; }
+  .model-sample .ms-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 3px; }
+  .checklist { background: var(--gray-card); border: 1px solid var(--gray-border); border-radius: var(--radius-lg); padding: 16px 20px; margin-top: 12px; width: 100%; }
+  .checklist-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-sub); margin-bottom: 8px; }
+  .check-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; padding: 5px 0; cursor: pointer; }
+  .check-row input { margin-top: 3px; accent-color: var(--coral); }
+  body.pdf-mode .btn-model, body.pdf-mode .model-sample { display: none !important; }
+  @media print { .btn-model, .model-sample { display: none !important; } }
+  @media (max-width: 640px) { .case-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Teacher key ---------- */
+  .answer-key {
+    max-width: 780px; margin: 10px 40px 0;
+    background: #FFF8F6; border: 1px dashed var(--coral-mid); border-radius: var(--radius); padding: 14px 20px;
+  }
+  .answer-key summary {
+    font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--coral-dark); cursor: pointer;
+  }
+  .key-body { margin-top: 12px; }
+  .key-item { font-size: 13px; color: var(--gray-sub); padding: 6px 0; border-bottom: 1px solid var(--gray-border); display: flex; gap: 12px; line-height: 1.5; }
+  .key-item:last-child { border-bottom: none; }
+  .key-item strong { color: var(--gray-text); min-width: 34px; flex-shrink: 0; }
+  .key-item span { color: var(--coral-dark); font-weight: 500; }
+  .key-note { font-size: 12px; color: var(--gray-sub); line-height: 1.6; margin-top: 10px; font-style: italic; }
+
+  /* ---------- PDF mode ---------- */
+  .pdf-answer {
+    display: inline-block; min-width: 60px; padding: 0 6px 1px;
+    border-bottom: 1.5px solid var(--coral); color: var(--coral-dark); font-weight: 500;
+  }
+  .pdf-answer-block {
+    display: block; padding: 8px 12px; border: 1px solid var(--coral-mid);
+    border-radius: 8px; background: var(--accent-bg); color: var(--gray-text); font-size: 14px; margin-top: 4px;
+  }
+  body.pdf-mode .tab-panel { display: block !important; margin-bottom: 20px; }
+  body.pdf-mode .score-bar,
+  body.pdf-mode .btn-row,
+  body.pdf-mode .feedback,
+  body.pdf-mode .timer-wrap,
+  body.pdf-mode .answer-key,
+  body.pdf-mode .tab-bar,
+  body.pdf-mode .header-tools { display: none !important; }
+  body.pdf-mode .ex-card, body.pdf-mode .explain-card, body.pdf-mode .speak-card { break-inside: avoid; page-break-inside: avoid; }
+  body.pdf-mode .speak-card { padding-bottom: 20px; }
+
+  @media print {
+    .score-bar, .btn-row, .feedback, .timer-wrap, .answer-key, .tab-bar, .header-tools { display: none !important; }
+    .tab-panel { display: block !important; }
+    body { background: #fff; }
+  }
+
+  @media (max-width: 640px) {
+    .page-header { padding: 24px 20px; }
+    .tab-bar { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; }
+    .content { padding: 20px; }
+    .answer-key { margin: 10px 20px 0; }
+    .header-title { font-size: 22px; }
+    .sentence { font-size: 15px; }
+    input.blank.w-l { width: 18ch; }
+    .speak-card { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div id="sheet">
+
+  <div class="page-header">
+    <div class="header-inner">
+      <div>
+        <div class="header-tag">Helena · Grammar Practice · B1/B2</div>
+        <div class="header-title">Conditionals in Clinical Practice</div>
+        <div class="header-sub">Zero · First · Second conditional — real situations and hypothetical ones</div>
+        <div class="header-student" id="nameDisplay"></div>
+      </div>
+      <div class="header-tools">
+        <input type="text" class="name-input" id="studentName" placeholder="Seu nome" autocomplete="off">
+        <button class="btn-pdf" type="button" id="btnPdf">Baixar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" type="button" data-tab="1">1. Explicação</button>
+    <button class="tab-btn" type="button" data-tab="2">2. Zero &amp; First</button>
+    <button class="tab-btn" type="button" data-tab="3">3. Second</button>
+    <button class="tab-btn" type="button" data-tab="4">4. Qual conditional?</button>
+    <button class="tab-btn" type="button" data-tab="5">5. Corrigir &amp; Reescrever</button>
+    <button class="tab-btn" type="button" data-tab="6">6. Speaking</button>
+    <button class="tab-btn" type="button" data-tab="7">7. Case Study Speaking</button>
+  </div>
+
+  <div class="content">
+
+    <div class="score-bar">
+      <div>
+        <div class="score-label">Pontuação</div>
+        <div class="score-num" id="scoreNum">0 / 18</div>
+      </div>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <button class="btn-reset" type="button" id="btnReset">Reiniciar</button>
+    </div>
+
+    <!-- ===================== TAB 1 — EXPLICAÇÃO ===================== -->
+    <div class="tab-panel active" id="panel1">
+      <div class="section-title">Três tipos de situação, três estruturas</div>
+      <div class="section-note">Todos os conditionals têm duas partes: a condição (<em>if...</em>) e o resultado. O que muda é o quão real ou imaginária é a situação.</div>
+
+      <div class="explain-card c-zero">
+        <div class="explain-title">Zero Conditional — fatos e protocolos</div>
+        <div class="formula">If + present simple, present simple</div>
+        <p>Usamos para algo que <strong>sempre</strong> acontece: fatos médicos, regras, protocolos de rotina. Dá para trocar <em>if</em> por <em>when</em>.</p>
+        <ul>
+          <li><strong>If a patient has a fever, we check for signs of infection.</strong></li>
+          <li><strong>When</strong> blood pressure drops, the heart beats faster.</li>
+        </ul>
+      </div>
+
+      <div class="explain-card c-first">
+        <div class="explain-title">First Conditional — possibilidade real no futuro</div>
+        <div class="formula">If + present simple, will + verbo base</div>
+        <p>Usamos para algo que <strong>pode realmente acontecer</strong> e qual será a consequência. Atenção: <strong>nunca</strong> use <em>will</em> logo depois do <em>if</em>.</p>
+        <ul>
+          <li><strong>If the troponin level is high, we will call the cardiology team.</strong></li>
+          <li><strong>Unless</strong> the pain improves, we will transfer him to the ICU. <em>(unless = if ... not)</em></li>
+        </ul>
+      </div>
+
+      <div class="explain-card c-second">
+        <div class="explain-title">Second Conditional — situações imaginárias e conselhos</div>
+        <div class="formula">If + past simple, would + verbo base</div>
+        <p>Usamos para situações <strong>imaginárias, improváveis ou contrárias à realidade</strong> — e também para dar conselhos com <em>If I were you...</em>. O passado aqui não indica tempo passado: indica <strong>distância da realidade</strong>.</p>
+        <ul>
+          <li><strong>If I were the attending, I would order an angiography.</strong></li>
+          <li><strong>If I were you, I would ask for a second opinion.</strong></li>
+          <li>Com o verbo <em>to be</em>, o padrão é <strong>were</strong> para todas as pessoas (<em>was</em> aparece no inglês informal).</li>
+        </ul>
+      </div>
+
+      <table class="compare-table">
+        <tr><th>Tipo</th><th>Estrutura</th><th>Quando usar</th><th>Exemplo clínico</th></tr>
+        <tr>
+          <td class="lbl t0">Zero</td>
+          <td class="t0">present + present</td>
+          <td>Fatos, regras, protocolos</td>
+          <td>If oxygen saturation drops, we give oxygen.</td>
+        </tr>
+        <tr>
+          <td class="lbl t1">First</td>
+          <td class="t1">present + will</td>
+          <td>Possibilidade real no futuro</td>
+          <td>If the ECG is abnormal, we will repeat it.</td>
+        </tr>
+        <tr>
+          <td class="lbl t2">Second</td>
+          <td class="t2">past + would</td>
+          <td>Imaginário, improvável, conselho</td>
+          <td>If we had more beds, we would admit him today.</td>
+        </tr>
+      </table>
+
+      <div class="tip-box">
+        💡 <strong>Teste rápido:</strong> É um fato ou uma regra? → <strong>Zero</strong>. Pode realmente acontecer? → <strong>First</strong>. É imaginário ou improvável? → <strong>Second</strong>.
+      </div>
+      <div class="tip-box">
+        🩺 <strong>Conectando com o que você já estudou:</strong> no resultado, você pode trocar <em>will / would</em> por modais como <em>might, could</em> e <em>should</em>. Ex.: <em>If the ECG is normal, we might still need imaging.</em> / <em>If I were you, I should call the cardiologist.</em>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 2 — ZERO & FIRST ===================== -->
+    <div class="tab-panel" id="panel2">
+      <div class="section-title">Zero &amp; First Conditional</div>
+      <div class="section-note">Complete cada frase com a forma correta do verbo entre parênteses. Se errar na primeira tentativa, você recebe uma dica e uma segunda chance. Pressione Enter para verificar.</div>
+
+      <div class="ex-card" id="z1">
+        <div class="ex-top"><span class="ex-num">1</span><span class="ex-tag">zero conditional</span></div>
+        <div class="sentence">If a patient's oxygen saturation <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(drop)</span> below 90%, we <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(give)</span> supplemental oxygen.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="z2">
+        <div class="ex-top"><span class="ex-num">2</span><span class="ex-tag">zero conditional</span></div>
+        <div class="sentence">If the heart <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(stop)</span> beating, the brain <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(not / get)</span> enough oxygen.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="z3">
+        <div class="ex-top"><span class="ex-num">3</span><span class="ex-tag">first conditional</span></div>
+        <div class="sentence">If the ECG <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(show)</span> ST-segment elevation, the team <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(activate)</span> the cath lab.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="z4">
+        <div class="ex-top"><span class="ex-num">4</span><span class="ex-tag">first conditional</span></div>
+        <div class="sentence">If her troponin level <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(not / go down)</span>, she <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(need)</span> further tests.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="z5">
+        <div class="ex-top"><span class="ex-num">5</span><span class="ex-tag">first conditional · unless</span></div>
+        <div class="sentence">Unless the pain <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(improve)</span> soon, we <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(transfer)</span> him to the ICU.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 3 — SECOND ===================== -->
+    <div class="tab-panel" id="panel3">
+      <div class="section-title">Second Conditional</div>
+      <div class="section-note">Agora são situações imaginárias. Complete com a forma correta do verbo (<em>if + past simple, would + verbo base</em>).</div>
+
+      <div class="ex-card" id="s1">
+        <div class="ex-top"><span class="ex-num">6</span><span class="ex-tag">second conditional</span></div>
+        <div class="sentence">If I <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(be)</span> the attending physician, I <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(order)</span> an angiography immediately.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="s2">
+        <div class="ex-top"><span class="ex-num">7</span><span class="ex-tag">second conditional</span></div>
+        <div class="sentence">If she <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(have)</span> a family history of heart disease, the doctors <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(suspect)</span> atherosclerosis.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="s3">
+        <div class="ex-top"><span class="ex-num">8</span><span class="ex-tag">second conditional · question</span></div>
+        <div class="sentence">What <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(you / do)</span> if a patient <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(collapse)</span> in the waiting room?</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="s4">
+        <div class="ex-top"><span class="ex-num">9</span><span class="ex-tag">second conditional · negative</span></div>
+        <div class="sentence">If I <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(not / know)</span> the diagnosis, I <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(ask)</span> a senior colleague for a second opinion.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="s5">
+        <div class="ex-top"><span class="ex-num">10</span><span class="ex-tag">second conditional · SCAD case</span></div>
+        <div class="sentence">If SCAD <input class="blank w-s" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(be)</span> easier to detect, more young women <input class="blank w-m" type="text" autocomplete="off" spellcheck="false"> <span class="verb-hint">(survive)</span> a cardiac arrest.</div>
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 4 — QUAL CONDITIONAL? ===================== -->
+    <div class="tab-panel" id="panel4">
+      <div class="section-title">Qual frase está correta?</div>
+      <div class="section-note">Leia a situação e escolha a frase que combina com ela. Aqui você tem uma única tentativa por questão.</div>
+
+      <div class="ex-card" id="m1">
+        <div class="ex-top"><span class="ex-num">11</span><span class="ex-tag">escolha a frase</span></div>
+        <div class="situation"><strong>Situação:</strong> você quer enunciar uma regra geral sobre diabetes — algo que sempre acontece.</div>
+        <div class="pill-group">
+          <button class="opt" type="button" data-opt="0">If blood sugar were too low, a diabetic patient will feel dizzy.</button>
+          <button class="opt" type="button" data-opt="1">If blood sugar will be too low, a diabetic patient feels dizzy.</button>
+          <button class="opt" type="button" data-opt="2">If blood sugar is too low, a diabetic patient feels dizzy.</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="m2">
+        <div class="ex-top"><span class="ex-num">12</span><span class="ex-tag">escolha a frase</span></div>
+        <div class="situation"><strong>Situação:</strong> você está falando de um plano realista para amanhã, caso um exame chegue a tempo.</div>
+        <div class="pill-group">
+          <button class="opt" type="button" data-opt="0">If the results come back tomorrow, we will adjust her medication.</button>
+          <button class="opt" type="button" data-opt="1">If the results would come back tomorrow, we adjust her medication.</button>
+          <button class="opt" type="button" data-opt="2">If the results came back tomorrow, we will adjust her medication.</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="m3">
+        <div class="ex-top"><span class="ex-num">13</span><span class="ex-tag">escolha a frase</span></div>
+        <div class="situation"><strong>Situação:</strong> você está sonhando com um hospital que tem muito mais funcionários do que o real.</div>
+        <div class="pill-group">
+          <button class="opt" type="button" data-opt="0">If we have more staff, we will save more lives.</button>
+          <button class="opt" type="button" data-opt="1">If we had more staff, we would save more lives.</button>
+          <button class="opt" type="button" data-opt="2">If we had more staff, we will save more lives.</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="m4">
+        <div class="ex-top"><span class="ex-num">14</span><span class="ex-tag">escolha a frase</span></div>
+        <div class="situation"><strong>Situação:</strong> um colega está em dúvida e você dá um conselho.</div>
+        <div class="pill-group">
+          <button class="opt" type="button" data-opt="0">If I am you, I would talk to the attending before deciding.</button>
+          <button class="opt" type="button" data-opt="1">If I were you, I will talk to the attending before deciding.</button>
+          <button class="opt" type="button" data-opt="2">If I were you, I would talk to the attending before deciding.</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 5 — CORRIGIR & REESCREVER ===================== -->
+    <div class="tab-panel" id="panel5">
+      <div class="section-title">Corrigir &amp; Reescrever</div>
+      <div class="section-note">Digite a frase completa. Nas duas primeiras há um erro de grammar para corrigir; nas duas últimas, você transforma a ideia em um conditional. Dá para tentar duas vezes.</div>
+
+      <div class="ex-card" id="e1">
+        <div class="ex-top"><span class="ex-num">15</span><span class="ex-tag">corrija o erro</span></div>
+        <div class="base-sentence">"If the patient <strong>will arrive</strong> late, we will start without him."</div>
+        <input class="rewrite" type="text" autocomplete="off" spellcheck="false" placeholder="Digite a frase corrigida...">
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="e2">
+        <div class="ex-top"><span class="ex-num">16</span><span class="ex-tag">corrija o erro</span></div>
+        <div class="base-sentence">"If I <strong>would have</strong> more time, I would read more clinical studies."</div>
+        <input class="rewrite" type="text" autocomplete="off" spellcheck="false" placeholder="Digite a frase corrigida...">
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="e3">
+        <div class="ex-top"><span class="ex-num">17</span><span class="ex-tag">reescreva · second conditional</span></div>
+        <div class="base-sentence">Realidade: "I don't have enough free time, so I don't exercise." <br>Reescreva como uma situação imaginária: <strong>"If I ..., I ..."</strong></div>
+        <input class="rewrite" type="text" autocomplete="off" spellcheck="false" placeholder="If I...">
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+
+      <div class="ex-card" id="e4">
+        <div class="ex-top"><span class="ex-num">18</span><span class="ex-tag">reescreva · first conditional</span></div>
+        <div class="base-sentence">Una as duas ideias em uma frase com <strong>if</strong>: "Take the medication. You will feel better."</div>
+        <input class="rewrite" type="text" autocomplete="off" spellcheck="false" placeholder="If you...">
+        <div class="btn-row"><button class="btn-check" type="button">Check</button></div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 6 — SPEAKING ===================== -->
+    <div class="tab-panel" id="panel6">
+      <div class="section-title">Speaking Practice</div>
+      <div class="section-note">Fale em voz alta pelo tempo do cronômetro. Não se preocupe em ser perfeita: foque em usar os conditionals de forma natural. Frases úteis: <em>If that happens, we will... / It depends on... / If I were in that situation, I would...</em></div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="speak-prompt">Explain your hospital's routine: if a patient arrives at the ER with chest pain, what do you usually do? And what will you do if the ECG looks normal but the pain continues?</div>
+          <div class="speak-focus">zero + first conditional</div>
+        </div>
+        <div class="timer-wrap" data-seconds="90"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="speak-prompt">If you could change one thing about your residency routine, what would it be? How would your days be different?</div>
+          <div class="speak-focus">second conditional</div>
+        </div>
+        <div class="timer-wrap" data-seconds="60"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="speak-prompt">Think about the SCAD cases we read. If you were the cardiologist treating one of those patients, what would you do first? What would you explain to her and her family?</div>
+          <div class="speak-focus">second conditional + modals (might, could, should)</div>
+        </div>
+        <div class="timer-wrap" data-seconds="90"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="speak-prompt">Role-play with your teacher: a patient asks, "What will happen if I don't take the medication?" Answer honestly and reassuringly. Then ask the patient, "What would you do if the pain came back at night?"</div>
+          <div class="speak-focus">first + second conditional · patient communication</div>
+        </div>
+        <div class="timer-wrap" data-seconds="60"></div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB 7 — CASE STUDY SPEAKING ===================== -->
+    <div class="tab-panel" id="panel7">
+      <div class="section-title">Case Study Speaking: apresentando um caso clínico</div>
+      <div class="section-note">Uma apresentação de caso segue sempre as mesmas 6 partes. Leia os dois casos abaixo e, para cada parte, fale sobre o <strong>Case B</strong> dentro do tempo do cronômetro, usando as frases úteis. Se quiser ver como soaria, abra o exemplo com o <strong>Case A</strong>. Esta aba não vale pontos.</div>
+
+      <div class="case-grid">
+        <div class="case-box a">
+          <h4>Case A — exemplo</h4>
+          <ul>
+            <li><strong>43-year-old woman</strong>, no known cardiovascular risk factors</li>
+            <li>Severe epigastric pain → acute dyspnea, central cyanosis, circulatory collapse → <strong>shockable cardiac arrest</strong></li>
+            <li>ROSC after ~10 min of CPR</li>
+            <li>Post-arrest ECG: atrial fibrillation, no ischemia</li>
+            <li>Angiography: 50% lesion, mid LAD → <strong>type 3 SCAD</strong>, confirmed by IVUS</li>
+            <li>Conservative management in the ICU</li>
+            <li>Discharged with no neurological deficits</li>
+          </ul>
+        </div>
+        <div class="case-box b">
+          <h4>Case B — você apresenta</h4>
+          <ul>
+            <li><strong>56-year-old woman</strong>, no previous CV disease, android obesity</li>
+            <li>3 days of constrictive, intense, prolonged retrosternal chest pain radiating to the left shoulder</li>
+            <li>BP 135/75 mmHg, HR 95 bpm, apyretic</li>
+            <li>ECG: convex ST-segment elevation in anterior leads + Q waves</li>
+            <li>Echo: apical and septoapical akinesia, EF 59%</li>
+            <li>Troponin &gt;1000 times normal</li>
+            <li>Angiography: spontaneous dissection of the LAD, no atheromatous lesion</li>
+            <li>Aspirin + beta-blockers; favorable evolution at 6 weeks</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 1</div>
+          <div class="part-title">Patient presentation</div>
+          <div class="chips">
+            <span class="chip">A ...-year-old woman presented with...</span>
+            <span class="chip">with no previous history of...</span>
+            <span class="chip">risk factors included...</span>
+            <span class="chip">pain radiating to...</span>
+          </div>
+          <div class="speak-prompt">Introduce the patient: age, sex, risk factors and the main complaint. Where did the pain start and how long did it last?</div>
+          <button class="btn-model" type="button" data-target="ms1">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms1"><div class="ms-label">Exemplo · Case A</div>"A 43-year-old woman with no known cardiovascular risk factors presented with severe epigastric pain, followed by sudden shortness of breath and central cyanosis."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="45"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 2</div>
+          <div class="part-title">Clinical findings</div>
+          <div class="chips">
+            <span class="chip">On examination, ...</span>
+            <span class="chip">The ECG revealed...</span>
+            <span class="chip">The echocardiography showed...</span>
+            <span class="chip">Troponin was elevated / within normal limits</span>
+          </div>
+          <div class="speak-prompt">Describe the vital signs, the ECG, the echocardiography and the lab results for Case B.</div>
+          <button class="btn-model" type="button" data-target="ms2">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms2"><div class="ms-label">Exemplo · Case A</div>"After resuscitation, the ECG showed atrial fibrillation without signs of ischemia. Coronary angiography revealed a 50% lesion in the mid left anterior descending artery, and the ventriculography showed hypokinesia of the anterior wall."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="60"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 3</div>
+          <div class="part-title">Diagnosis &amp; differential</div>
+          <div class="chips">
+            <span class="chip">The findings were consistent with...</span>
+            <span class="chip">There was no evidence of...</span>
+            <span class="chip">The diagnosis was confirmed by...</span>
+            <span class="chip">If it were ..., we would expect...</span>
+          </div>
+          <div class="speak-prompt">What was the diagnosis? Explain why it was not a typical heart attack. Use a second conditional: "If it were atherosclerosis, we would expect..."</div>
+          <button class="btn-model" type="button" data-target="ms3">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms3"><div class="ms-label">Exemplo · Case A</div>"The findings were consistent with type 3 spontaneous coronary artery dissection, confirmed by intravascular ultrasound. There was no evidence of atherosclerosis. If it were a typical heart attack, we would expect to see a plaque in the artery."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="60"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 4</div>
+          <div class="part-title">Treatment &amp; management</div>
+          <div class="chips">
+            <span class="chip">The patient received...</span>
+            <span class="chip">The team opted for conservative management because...</span>
+            <span class="chip">Instead of..., they chose...</span>
+            <span class="chip">If she became unstable, they would consider...</span>
+          </div>
+          <div class="speak-prompt">What treatment did the patient receive, and why? What would the team do if she got worse?</div>
+          <button class="btn-model" type="button" data-target="ms4">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms4"><div class="ms-label">Exemplo · Case A</div>"The IVUS findings did not support an immediate percutaneous intervention, so the team opted for conservative management in the ICU. If she became unstable, they would consider an intervention."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="60"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 5</div>
+          <div class="part-title">Outcome &amp; follow-up</div>
+          <div class="chips">
+            <span class="chip">She was discharged...</span>
+            <span class="chip">The outcome was favorable</span>
+            <span class="chip">At the 6-week follow-up...</span>
+            <span class="chip">She has been recovering well since...</span>
+          </div>
+          <div class="speak-prompt">How did the patient evolve? What did the follow-up show? Use the Present Perfect Continuous at least once.</div>
+          <button class="btn-model" type="button" data-target="ms5">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms5"><div class="ms-label">Exemplo · Case A</div>"The vasopressors were gradually withdrawn, she was extubated early, and she was discharged without neurological deficits. Since then, she has been attending regular check-ups."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="45"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Part 6</div>
+          <div class="part-title">Take-home message</div>
+          <div class="chips">
+            <span class="chip">This case highlights...</span>
+            <span class="chip">Clinicians should consider...</span>
+            <span class="chip">It is important to remember that...</span>
+            <span class="chip">If we recognized it earlier, ... would...</span>
+          </div>
+          <div class="speak-prompt">What should other doctors learn from this case? Finish with one conditional sentence.</div>
+          <button class="btn-model" type="button" data-target="ms6">Ver exemplo (Case A)</button>
+          <div class="model-sample" id="ms6"><div class="ms-label">Exemplo · Case A</div>"This case highlights that SCAD can cause cardiac arrest in young women without risk factors. If clinicians looked for it earlier, more patients would receive the right diagnosis."</div>
+        </div>
+        <div class="timer-wrap" data-seconds="45"></div>
+      </div>
+
+      <div class="speak-card">
+        <div class="speak-text">
+          <div class="part-label">Desafio final</div>
+          <div class="part-title">Apresentação completa do Case B</div>
+          <div class="speak-prompt">Junte as 6 partes em uma apresentação contínua, como em uma discussão de caso com a equipe. Depois, marque o que você cobriu.</div>
+          <div class="speak-focus">case presentation · all tenses + conditionals</div>
+          <div class="checklist">
+            <div class="checklist-title">Checklist da apresentação</div>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc1"> Apresentei a paciente (idade, sexo, fatores de risco, queixa principal)</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc2"> Descrevi os achados (sinais vitais, ECG, eco, troponina)</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc3"> Expliquei o diagnóstico e por que não era um infarto típico</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc4"> Expliquei o tratamento e o motivo da escolha</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc5"> Descrevi a evolução e o seguimento</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc6"> Terminei com uma mensagem final (take-home message)</label>
+            <label class="check-row"><input type="checkbox" class="case-check" id="cc7"> Usei pelo menos um conditional</label>
+          </div>
+        </div>
+        <div class="timer-wrap" data-seconds="180"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<details class="answer-key" id="answerKey">
+  <summary>Gabarito do professor (clique para abrir)</summary>
+  <div class="key-body" id="keyBody"></div>
+  <div class="key-note">Nos exercícios 1–10 e 15–18, o aluno tem duas tentativas: na primeira resposta errada recebe uma dica; na segunda, a resposta correta é revelada e a questão fica travada. Contrações (I'd, we'll, doesn't) e "was" no lugar de "were" são aceitas. Nas questões 11–14 há uma única tentativa.</div>
+</details>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'helena_conditionals_v1';
+  var TOTAL = 18;
+
+  /* ---------- Respostas (ficam só no JS, nunca no HTML) ---------- */
+  var ITEMS = {
+    z1: { kind: 'fill', n: 1, ans: [['drops'], ['give']], key: 'drops / give',
+          hint: 'Fato geral: present simple nas duas partes. Atenção ao sujeito "oxygen saturation" (3ª pessoa).',
+          expl: 'Zero conditional: fato médico → present simple + present simple.' },
+    z2: { kind: 'fill', n: 2, ans: [['stops'], ["doesn't get", 'does not get']], key: "stops / doesn't get (does not get)",
+          hint: 'Fato geral, então present simple. "The heart" e "the brain" pedem verbo na 3ª pessoa; a negativa usa doesn\'t.',
+          expl: 'Zero conditional: verdade científica → present simple nas duas partes.' },
+    z3: { kind: 'fill', n: 3, ans: [['shows'], ['will activate', 'll activate']], key: 'shows / will activate',
+          hint: 'Possibilidade real no futuro: if + present simple, will + verbo base.',
+          expl: 'First conditional: condição real → if + present simple, will + verbo base.' },
+    z4: { kind: 'fill', n: 4, ans: [["doesn't go down", 'does not go down'], ['will need', 'll need']], key: "doesn't go down (does not go down) / will need",
+          hint: 'Primeira parte: present simple negativo, 3ª pessoa. Segunda parte: will + verbo base.',
+          expl: 'First conditional: nunca use will logo depois do if.' },
+    z5: { kind: 'fill', n: 5, ans: [['improves'], ['will transfer', 'll transfer']], key: 'improves / will transfer',
+          hint: 'Unless = if ... not. Depois de unless usamos present simple, e o resultado leva will.',
+          expl: 'Unless the pain improves = If the pain doesn\'t improve.' },
+
+    s1: { kind: 'fill', n: 6, ans: [['were', 'was'], ['would order', 'd order']], key: 'were (was) / would order',
+          hint: 'Imaginário: if + past simple, would + verbo base. Com "to be", o padrão é "were" para todas as pessoas.',
+          expl: 'Second conditional: você não é o attending, então a situação é imaginária.' },
+    s2: { kind: 'fill', n: 7, ans: [['had'], ['would suspect']], key: 'had / would suspect',
+          hint: 'Parte do if: past simple. Resultado: would + verbo base.',
+          expl: 'Second conditional: situação contrária à realidade da paciente.' },
+    s3: { kind: 'fill', n: 8, ans: [['would you do'], ['collapsed']], key: 'would you do / collapsed',
+          hint: 'Pergunta no second conditional: What would + sujeito + verbo base...? A parte do if fica no past simple.',
+          expl: 'Pergunta hipotética: What would you do if...?' },
+    s4: { kind: 'fill', n: 9, ans: [["didn't know", 'did not know'], ['would ask', 'd ask']], key: "didn't know (did not know) / would ask",
+          hint: 'Negativa no past simple: didn\'t + verbo base. Depois, would + verbo base.',
+          expl: 'Second conditional negativo: if + didn\'t + verbo base.' },
+    s5: { kind: 'fill', n: 10, ans: [['were', 'was'], ['would survive']], key: 'were (was) / would survive',
+          hint: 'Situação irreal hoje: if + past simple, would + verbo base. Com "to be", prefira "were".',
+          expl: 'Second conditional: hoje a SCAD não é fácil de detectar — por isso é imaginário.' },
+
+    m1: { kind: 'pick', n: 11, correct: 2, key: 'If blood sugar is too low, a diabetic patient feels dizzy.',
+          expl: 'Regra geral → zero conditional (present + present).' },
+    m2: { kind: 'pick', n: 12, correct: 0, key: 'If the results come back tomorrow, we will adjust her medication.',
+          expl: 'Plano realista → first conditional (present + will).' },
+    m3: { kind: 'pick', n: 13, correct: 1, key: 'If we had more staff, we would save more lives.',
+          expl: 'Situação imaginária → second conditional (past + would).' },
+    m4: { kind: 'pick', n: 14, correct: 2, key: 'If I were you, I would talk to the attending before deciding.',
+          expl: 'Conselho → "If I were you, I would...".' },
+
+    e1: { kind: 'fill', n: 15, ans: [[
+            'if the patient arrives late we will start without him',
+            'if the patient arrives late well start without him'
+          ]], key: 'If the patient arrives late, we will start without him.',
+          hint: 'Depois de "if" no first conditional, use present simple (não will).',
+          expl: 'First conditional: if + present simple, will + verbo base.' },
+    e2: { kind: 'fill', n: 16, ans: [[
+            'if i had more time i would read more clinical studies',
+            'if i had more time id read more clinical studies'
+          ]], key: 'If I had more time, I would read more clinical studies.',
+          hint: 'Na parte do if, o second conditional usa past simple — não usa would.',
+          expl: 'Second conditional: if + past simple, would + verbo base.' },
+    e3: { kind: 'fill', n: 17, ans: [[
+            'if i had enough free time i would exercise',
+            'if i had enough free time id exercise',
+            'if i had enough free time i would work out',
+            'if i had enough free time id work out'
+          ]], key: 'If I had enough free time, I would exercise.',
+          hint: 'Realidade no presente ("don\'t have") vira past simple na parte do if; o resultado usa would + verbo base.',
+          expl: 'Second conditional: contraria a realidade do presente.' },
+    e4: { kind: 'fill', n: 18, ans: [[
+            'if you take the medication you will feel better',
+            'if you take the medication youll feel better'
+          ]], key: 'If you take the medication, you will feel better.',
+          hint: 'Possibilidade real: if + present simple, will + verbo base.',
+          expl: 'First conditional: ação real → consequência provável.' }
+  };
+
+  var ORDER = Object.keys(ITEMS);
+
+  /* ---------- Utilidades ---------- */
+  function $(id) { return document.getElementById(id); }
+
+  function norm(s) {
+    return String(s).toLowerCase()
+      .replace(/[‘’`]/g, "'")
+      .replace(/[.,!?;:"“”']/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  var state = { name: '', cards: {}, checks: {} };
+
+  function st(id) {
+    if (!state.cards[id]) state.cards[id] = { attempts: 0, status: null, vals: [], pick: null };
+    return state.cards[id];
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function fieldsOf(id) {
+    return Array.prototype.slice.call($(id).querySelectorAll('input.blank, input.rewrite'));
+  }
+
+  /* ---------- Placar ---------- */
+  function updateScore() {
+    var right = 0;
+    ORDER.forEach(function (id) { if (state.cards[id] && state.cards[id].status === 'correct') right++; });
+    $('scoreNum').textContent = right + ' / ' + TOTAL;
+    $('scoreFill').style.width = Math.round((right / TOTAL) * 100) + '%';
+  }
+
+  /* ---------- Exercícios de digitar ---------- */
+  function evalFill(id) {
+    return fieldsOf(id).map(function (inp, i) {
+      var given = norm(inp.value);
+      return ITEMS[id].ans[i].some(function (a) { return norm(a) === given; });
+    });
+  }
+
+  function renderFill(id) {
+    var card = $(id), s = st(id), fb = card.querySelector('.feedback'), btn = card.querySelector('.btn-check');
+    var flags = evalFill(id);
+    fieldsOf(id).forEach(function (inp, i) {
+      inp.classList.remove('correct', 'wrong');
+      if (s.attempts > 0) inp.classList.add(flags[i] ? 'correct' : 'wrong');
+      inp.disabled = !!s.status;
+    });
+    card.classList.remove('done-correct', 'done-wrong');
+    fb.className = 'feedback';
+    if (s.status === 'correct') {
+      card.classList.add('done-correct');
+      fb.className = 'feedback show correct';
+      fb.innerHTML = '✓ Correct! ' + ITEMS[id].expl;
+      btn.disabled = true;
+    } else if (s.status === 'wrong') {
+      card.classList.add('done-wrong');
+      fb.className = 'feedback show partial';
+      fb.innerHTML = '✗ Resposta correta: <em>' + ITEMS[id].key + '</em><br>' + ITEMS[id].expl;
+      btn.disabled = true;
+    } else if (s.attempts > 0) {
+      fb.className = 'feedback show hint';
+      fb.innerHTML = '✗ Quase! Tente mais uma vez. 💡 ' + ITEMS[id].hint;
+      btn.disabled = false;
+    } else {
+      btn.disabled = false;
+    }
+  }
+
+  function checkFill(id) {
+    var s = st(id);
+    if (s.status) return;
+    var fields = fieldsOf(id);
+    var empty = fields.some(function (f) { return !f.value.trim(); });
+    var fb = $(id).querySelector('.feedback');
+    if (empty) {
+      fb.className = 'feedback show hint';
+      fb.innerHTML = 'Preencha todos os espaços antes de verificar.';
+      return;
+    }
+    s.attempts++;
+    s.vals = fields.map(function (f) { return f.value; });
+    var flags = evalFill(id);
+    if (flags.every(Boolean)) s.status = 'correct';
+    else if (s.attempts >= 2) s.status = 'wrong';
+    renderFill(id);
+    updateScore();
+    save();
+  }
+
+  /* ---------- Exercícios de escolha ---------- */
+  function renderPick(id) {
+    var card = $(id), s = st(id), fb = card.querySelector('.feedback');
+    var opts = card.querySelectorAll('.opt');
+    card.classList.remove('done-correct', 'done-wrong');
+    Array.prototype.forEach.call(opts, function (o, i) {
+      o.classList.remove('selected-correct', 'selected-wrong', 'reveal-correct', 'locked');
+      if (s.status) {
+        o.classList.add('locked');
+        if (i === s.pick) o.classList.add(s.status === 'correct' ? 'selected-correct' : 'selected-wrong');
+        else if (s.status === 'wrong' && i === ITEMS[id].correct) o.classList.add('reveal-correct');
+      }
+    });
+    fb.className = 'feedback';
+    if (s.status === 'correct') {
+      card.classList.add('done-correct');
+      fb.className = 'feedback show correct';
+      fb.innerHTML = '✓ Correct! ' + ITEMS[id].expl;
+    } else if (s.status === 'wrong') {
+      card.classList.add('done-wrong');
+      fb.className = 'feedback show partial';
+      fb.innerHTML = '✗ Não foi dessa vez. ' + ITEMS[id].expl;
+    }
+  }
+
+  function pick(id, idx) {
+    var s = st(id);
+    if (s.status) return;
+    s.pick = idx;
+    s.attempts = 1;
+    s.status = (idx === ITEMS[id].correct) ? 'correct' : 'wrong';
+    renderPick(id);
+    updateScore();
+    save();
+  }
+
+  /* ---------- Carregar / Reiniciar ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data && typeof data === 'object') state = { name: data.name || '', cards: data.cards || {}, checks: data.checks || {} };
+      }
+    } catch (e) {}
+    $('studentName').value = state.name;
+    showName();
+    Object.keys(state.checks).forEach(function (cid) {
+      var box = $(cid);
+      if (box) box.checked = !!state.checks[cid];
+    });
+    ORDER.forEach(function (id) {
+      var s = state.cards[id];
+      if (!$(id)) return;
+      if (ITEMS[id].kind === 'fill') {
+        var fields = fieldsOf(id);
+        if (s && s.vals) fields.forEach(function (f, i) { if (s.vals[i] != null) f.value = s.vals[i]; });
+        if (s && s.attempts > 0) renderFill(id);
+      } else if (s && s.status) {
+        renderPick(id);
+      }
+    });
+    updateScore();
+  }
+
+  function resetAll() {
+    var name = state.name;
+    state = { name: name, cards: {}, checks: {} };
+    Array.prototype.forEach.call(document.querySelectorAll('.case-check'), function (box) { box.checked = false; });
+    ORDER.forEach(function (id) {
+      var card = $(id);
+      card.classList.remove('done-correct', 'done-wrong');
+      var fb = card.querySelector('.feedback');
+      fb.className = 'feedback';
+      fb.innerHTML = '';
+      var btn = card.querySelector('.btn-check');
+      if (btn) btn.disabled = false;
+      fieldsOf(id).forEach(function (f) { f.value = ''; f.disabled = false; f.classList.remove('correct', 'wrong'); });
+      Array.prototype.forEach.call(card.querySelectorAll('.opt'), function (o) {
+        o.classList.remove('selected-correct', 'selected-wrong', 'reveal-correct', 'locked');
+      });
+    });
+    updateScore();
+    save();
+  }
+
+  /* ---------- Nome do aluno ---------- */
+  function showName() {
+    $('nameDisplay').innerHTML = state.name ? 'Aluna: <strong>' + state.name.replace(/[&<>"]/g, '') + '</strong>' : '';
+  }
+
+  /* ---------- Gabarito ---------- */
+  function buildKey() {
+    var html = '';
+    ORDER.forEach(function (id) {
+      html += '<div class="key-item"><strong>' + ITEMS[id].n + '</strong><span>' + ITEMS[id].key + '</span></div>';
+    });
+    $('keyBody').innerHTML = html;
+  }
+
+  /* ---------- Abas ---------- */
+  function showTab(n) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-panel'), function (p) { p.classList.remove('active'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-btn'), function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === String(n)); });
+    $('panel' + n).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ---------- Cronômetros ---------- */
+  var RING_R = 36, RING_C = 2 * Math.PI * RING_R;
+  function fmt(s) { return ('0' + Math.floor(s / 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2); }
+
+  function setupTimers() {
+    Array.prototype.forEach.call(document.querySelectorAll('.timer-wrap'), function (wrap) {
+      var total = parseInt(wrap.getAttribute('data-seconds'), 10) || 60;
+      wrap.innerHTML =
+        '<svg width="84" height="84" viewBox="0 0 84 84"><circle class="ring-bg" cx="42" cy="42" r="36"></circle><circle class="ring-progress" cx="42" cy="42" r="36"></circle></svg>' +
+        '<div class="timer-time">' + fmt(total) + '</div>' +
+        '<div class="timer-btn-wrap"><button class="timer-btn" type="button">Start</button></div>';
+      var ring = wrap.querySelector('.ring-progress');
+      var label = wrap.querySelector('.timer-time');
+      var btn = wrap.querySelector('.timer-btn');
+      ring.style.strokeDasharray = RING_C;
+      ring.style.strokeDashoffset = 0;
+      var remaining = total, handle = null;
+
+      function paint() {
+        label.textContent = fmt(remaining);
+        ring.style.strokeDashoffset = RING_C * (1 - remaining / total);
+        wrap.classList.toggle('danger', remaining <= 10 && remaining > 0);
+      }
+      function stop(resetNow) {
+        if (handle) { clearInterval(handle); handle = null; }
+        btn.textContent = 'Start';
+        btn.classList.remove('stop');
+        if (resetNow) { remaining = total; paint(); }
+      }
+      btn.addEventListener('click', function () {
+        if (handle) { stop(true); return; }
+        btn.textContent = 'Stop';
+        btn.classList.add('stop');
+        handle = setInterval(function () {
+          remaining--;
+          paint();
+          if (remaining <= 0) {
+            stop(false);
+            label.textContent = 'Time!';
+            wrap.classList.remove('danger');
+            setTimeout(function () { remaining = total; paint(); }, 2000);
+          }
+        }, 1000);
+      });
+    });
+  }
+
+  /* ---------- PDF ---------- */
+  function exportPDF() {
+    var added = [];
+    document.body.classList.add('pdf-mode');
+    ORDER.forEach(function (id) {
+      fieldsOf(id).forEach(function (inp) {
+        var span = document.createElement('span');
+        var isBlock = inp.classList.contains('rewrite');
+        span.className = isBlock ? 'pdf-answer-block' : 'pdf-answer';
+        span.textContent = inp.value || '—';
+        inp.style.display = 'none';
+        inp.parentNode.insertBefore(span, inp.nextSibling);
+        added.push({ input: inp, span: span });
+      });
+    });
+    var nm = (state.name || 'helena').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    var opt = {
+      margin: 10,
+      filename: 'conditionals-' + nm + '.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+    function cleanup() {
+      added.forEach(function (a) { a.span.remove(); a.input.style.display = ''; });
+      document.body.classList.remove('pdf-mode');
+    }
+    if (typeof html2pdf === 'undefined') { cleanup(); alert('Não foi possível carregar o gerador de PDF. Verifique a conexão.'); return; }
+    html2pdf().set(opt).from($('sheet')).save().then(cleanup).catch(cleanup);
+  }
+
+  /* ---------- Eventos (delegados) ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var tab = t.closest ? t.closest('.tab-btn') : null;
+    if (tab) { showTab(tab.getAttribute('data-tab')); return; }
+
+    var chk = t.closest ? t.closest('.btn-check') : null;
+    if (chk) { var cardC = chk.closest('.ex-card'); if (cardC && ITEMS[cardC.id]) checkFill(cardC.id); return; }
+
+    var mb = t.closest ? t.closest('.btn-model') : null;
+    if (mb) {
+      var sample = $(mb.getAttribute('data-target'));
+      if (sample) {
+        sample.classList.toggle('show');
+        mb.textContent = sample.classList.contains('show') ? 'Esconder exemplo' : 'Ver exemplo (Case A)';
+      }
+      return;
+    }
+
+    var opt = t.closest ? t.closest('.opt') : null;
+    if (opt) {
+      var cardO = opt.closest('.ex-card');
+      if (cardO && ITEMS[cardO.id]) pick(cardO.id, parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var t = e.target;
+    if (t && t.tagName === 'INPUT' && (t.classList.contains('blank') || t.classList.contains('rewrite'))) {
+      var card = t.closest('.ex-card');
+      if (card && ITEMS[card.id]) { e.preventDefault(); checkFill(card.id); }
+    }
+  });
+
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'INPUT' && (t.classList.contains('blank') || t.classList.contains('rewrite'))) {
+      var card = t.closest('.ex-card');
+      if (card && ITEMS[card.id] && !st(card.id).status) {
+        st(card.id).vals = fieldsOf(card.id).map(function (f) { return f.value; });
+        save();
+      }
+    }
+  });
+
+  $('studentName').addEventListener('input', function () {
+    state.name = this.value;
+    showName();
+    save();
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('case-check')) {
+      state.checks[t.id] = t.checked;
+      save();
+    }
+  });
+  $('btnReset').addEventListener('click', resetAll);
+  $('btnPdf').addEventListener('click', exportPDF);
+
+  /* ---------- Início ---------- */
+  buildKey();
+  setupTimers();
+  load();
+})();
+</script>
+</body>
+</html>
